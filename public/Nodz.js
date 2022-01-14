@@ -1,4 +1,4 @@
-import {useEffect, useState, useRef} from 'preact/hooks'
+import {useEffect, useState, useRef, useCallback} from 'preact/hooks'
 import recursive_reduce from './helpers/recursive-reduce'
 import is_node from './helpers/is-node'
 import calculate_node_layout from './helpers/calculate-node-layout'
@@ -13,7 +13,8 @@ function ErrorNode({type}) {
 
 export default function Nodz({node_types, graph, node_styles}) {
   const wrapper_ref = useRef()
-  const [laid_out, set_laid_out] = useState(0)
+  const [laid_out, set_laid_out] = useState(null)
+  const update_layout = useCallback(() => set_laid_out({}), [])
 
   const nodes_array = recursive_reduce(
     graph,
@@ -21,12 +22,13 @@ export default function Nodz({node_types, graph, node_styles}) {
     [],
     'base_node',
   )
-  nodes_array.forEach((n) => (n.ref = useRef()))
 
+  nodes_array.forEach((n) => (n.ref = useRef()))
   calculate_node_layout(wrapper_ref, graph, nodes_array)
 
   useEffect(() => {
-    set_laid_out(laid_out + 1)
+    update_layout()
+    window.addEventListener('resize', update_layout)
   }, [])
 
   return (
