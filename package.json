@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "dev": "wmr -p 1234 --reload",
+    "build": "wmr build",
+    "serve": "wmr serve -p 1234"
+  },
+  "dependencies": {
+    "preact": "^10.6.4"
+  },
+  "devDependencies": {
+    "wmr": "^3.7.2"
+  }
+}
