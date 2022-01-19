@@ -5,7 +5,8 @@
     "serve": "wmr serve -p 1234"
   },
   "dependencies": {
-    "preact": "^10.6.4"
+    "preact": "^10.6.4",
+    "use-dynamic-refs": "^1.0.0"
   },
   "devDependencies": {
     "wmr": "^3.7.2"

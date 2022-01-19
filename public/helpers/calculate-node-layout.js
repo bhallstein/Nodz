@@ -7,15 +7,15 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
     return
   }
 
-  const v_padding = 24
-  const h_padding = 24
+  const v_padding = 70
+  const h_padding = 50
   const container_w = wrapper.current.getBoundingClientRect().width
 
   nodes_array.forEach(
     (n) =>
       (n.layout = {
-        w__intrinsic: n.ref.current.getBoundingClientRect().width,
-        h__intrinsic: n.ref.current.getBoundingClientRect().height,
+        w__intrinsic: n.dummy_ref.current.getBoundingClientRect().width,
+        h__intrinsic: n.dummy_ref.current.getBoundingClientRect().height,
       }),
   )
 
@@ -79,11 +79,5 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
         left += child.layout.w__calculated + h_padding
       })
     }
-  })
-
-  // Apply layout
-  nodes_array.forEach((node) => {
-    node.ref.current.style.top = `${node.layout.y}px`
-    node.ref.current.style.left = `${node.layout.x}px`
   })
 }
