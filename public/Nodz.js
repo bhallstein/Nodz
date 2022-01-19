@@ -1,16 +1,9 @@
-import {useEffect, useState, useRef, useCallback} from 'preact/hooks'
+import {useEffect, useState, useRef, useCallback} from 'react'
 import use_dynamic_refs from 'use-dynamic-refs'
+import RenderNode from './RenderNode'
 import recursive_reduce from './helpers/recursive-reduce'
 import is_node from './helpers/is-node'
 import calculate_node_layout from './helpers/calculate-node-layout'
-
-function ErrorNode({type}) {
-  return (
-    <div style={{width: '8rem'}}>
-      Error: node type "{type}" not found in node_types
-    </div>
-  )
-}
 
 function ref(i) {
   return `${i}-ref`
@@ -67,11 +60,18 @@ export default function Nodz({node_types, graph, node_styles}) {
   }
 
   function select_node(n) {
-    set_selected(n.uid)
+    set_selected(n ? n.uid : null)
   }
 
   return (
-    <div ref={wrapper_ref}>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+      }}
+      ref={wrapper_ref}
+      onClick={() => select_node(null)}
+    >
       <div
         style={{
           width: '0',
@@ -97,47 +97,17 @@ export default function Nodz({node_types, graph, node_styles}) {
 
       <div>
         {nodes_array.map((node) => {
-          const Node = node_types[node.node_type]
-          const is_selected = selected === node.uid
           return (
-            <div
-              className="group"
+            <RenderNode
+              NodeType={node_types[node.node_type]}
+              node={node}
+              nodeinfo={Node.nodeinfo ? Node.nodeinfo(node) : {}}
+              is_selected={selected === node.uid}
+              node_styles={node_styles}
+              add_node={add_node}
+              select_node={select_node}
               ref={setRef(ref(node.uid))}
-              style={{
-                position: 'absolute',
-                paddingBottom: '21px',
-                top: `${node.layout && node.layout.y}px`,
-                left: `${node.layout && node.layout.x}px`,
-              }}
-            >
-              <div
-                className="hover-reveal"
-                style={{
-                  width: '14px',
-                  height: '14px',
-                  fontSize: '14px',
-                  border: '1px solid black',
-                  borderRadius: '10rem',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  position: 'absolute',
-                  top: 'calc(100% - 1rem)',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                }}
-                onClick={() => add_node(node.ref)}
-              >
-                +
-              </div>
-              <div
-                style={{
-                  ...node_styles(is_selected),
-                }}
-                onClick={() => select_node(node)}
-              >
-                {Node ? <Node /> : <ErrorNode type={node.node_type} />}
-              </div>
-            </div>
+            />
           )
         })}
       </div>

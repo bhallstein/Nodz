@@ -132,3 +132,8 @@ input {
 .group:hover .hover-reveal {
   visibility: visible;
 }
+
+svg {
+  width: 1em;
+  height: 1em;
+}
