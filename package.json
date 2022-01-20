@@ -2,7 +2,8 @@
   "scripts": {
     "dev": "wmr -p 1234 --reload",
     "build": "wmr build",
-    "serve": "wmr serve -p 1234"
+    "serve": "wmr serve -p 1234",
+    "lint": "eslint --fix ."
   },
   "dependencies": {
     "preact": "^10.6.4",

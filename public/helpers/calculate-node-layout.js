@@ -12,7 +12,7 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
   const container_w = wrapper.current.getBoundingClientRect().width
 
   nodes_array.forEach(
-    (n) =>
+    n =>
       (n.layout = {
         w__intrinsic: n.dummy_ref.current.getBoundingClientRect().width,
         h__intrinsic: n.dummy_ref.current.getBoundingClientRect().height,
@@ -33,13 +33,13 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
     'base_node',
   )
 
-  const tier_heights = Object.values(tiers).map((tier) => {
+  const tier_heights = Object.values(tiers).map(tier => {
     return tier.reduce((carry, n) => Math.max(carry, n.layout.h__intrinsic), 0)
   })
 
   // Assign cumulative child widths to all nodes by depth-first recursion
-  nodes_array.forEach((n) => (n.recursive_width = null))
-  recurse(graph, null, (n) => {
+  nodes_array.forEach(n => (n.recursive_width = null))
+  recurse(graph, null, n => {
     if (!is_node(n)) {
       return
     }
@@ -53,7 +53,7 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
   // Calculate vertical positions
   let current_offset = 0
   Object.values(tiers).forEach((nodes, i) => {
-    nodes.forEach((node) => (node.layout.y = current_offset))
+    nodes.forEach(node => (node.layout.y = current_offset))
     current_offset += tier_heights[i] + v_padding
   })
 
@@ -61,7 +61,7 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
   const center_x = container_w / 2
   graph.layout.x = center_x - graph.layout.w__intrinsic / 2
   graph.layout.x_center = center_x
-  recurse(graph, (n) => {
+  recurse(graph, n => {
     if (!is_node(n) || !n.children) {
       return
     }
@@ -72,7 +72,7 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
     }
     if (n.children.length > 1) {
       let left = n.layout.x_center - n.layout.w__calculated / 2
-      n.children.forEach((child, i) => {
+      n.children.forEach(child => {
         const x_center = left + child.layout.w__calculated / 2
         child.layout.x_center = x_center
         child.layout.x = x_center - child.layout.w__intrinsic / 2

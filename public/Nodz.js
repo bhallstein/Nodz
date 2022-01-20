@@ -1,6 +1,6 @@
-import {useEffect, useState, useRef, useCallback} from 'react'
+import {useEffect, useState, useRef} from 'react'
 import use_dynamic_refs from 'use-dynamic-refs'
-import RenderNode from './RenderNode'
+import RenderNode, {ErrorNode} from './RenderNode'
 import recursive_reduce from './helpers/recursive-reduce'
 import is_node from './helpers/is-node'
 import calculate_node_layout from './helpers/calculate-node-layout'
@@ -29,9 +29,9 @@ export default function Nodz({node_types, graph, node_styles}) {
     [],
     'base_node',
   )
-  nodes_array.forEach((n) => !n.uid && (n.uid = uid()))
-  nodes_array.forEach((n) => (n.ref = getRef(ref(n.uid))))
-  nodes_array.forEach((n) => (n.dummy_ref = getRef(dummy_ref(n.uid))))
+  nodes_array.forEach(n => !n.uid && (n.uid = uid()))
+  nodes_array.forEach(n => (n.ref = getRef(ref(n.uid))))
+  nodes_array.forEach(n => (n.dummy_ref = getRef(dummy_ref(n.uid))))
 
   useEffect(
     () => {
@@ -51,7 +51,7 @@ export default function Nodz({node_types, graph, node_styles}) {
   }
 
   function add_node(ref) {
-    const node = nodes_array.find((node) => node.ref === ref)
+    const node = nodes_array.find(node => node.ref === ref)
     !node.children && (node.children = [])
     const typenames = Object.keys(node_types)
     const t = typenames[Math.floor(Math.random() * typenames.length)]
@@ -64,28 +64,26 @@ export default function Nodz({node_types, graph, node_styles}) {
   }
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-      }}
-      ref={wrapper_ref}
-      onClick={() => select_node(null)}
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+    }}
+         ref={wrapper_ref}
+         onClick={() => select_node(null)}
     >
-      <div
-        style={{
-          width: '0',
-          height: '0',
-          overflow: 'hidden',
-          position: 'absolute',
-        }}
+      <div style={{
+        width: '0',
+        height: '0',
+        overflow: 'hidden',
+        position: 'absolute',
+      }}
       >
-        {nodes_array.map((node) => {
+        {nodes_array.map((node, i) => {
           const Node = node_types[node.node_type]
           return (
-            <div
-              ref={setRef(dummy_ref(node.uid))}
-              style={{position: 'absolute'}}
+            <div key={i}
+                 ref={setRef(dummy_ref(node.uid))}
+                 style={{position: 'absolute'}}
             >
               <div style={{...node_styles(false)}}>
                 {Node ? <Node /> : <ErrorNode type={node.node_type} />}
@@ -96,18 +94,17 @@ export default function Nodz({node_types, graph, node_styles}) {
       </div>
 
       <div>
-        {nodes_array.map((node) => {
+        {nodes_array.map((node, i) => {
           return (
-            <RenderNode
-              NodeType={node_types[node.node_type]}
-              node={node}
-              nodeinfo={Node.nodeinfo ? Node.nodeinfo(node) : {}}
-              is_selected={selected === node.uid}
-              node_styles={node_styles}
-              add_node={add_node}
-              select_node={select_node}
-              ref={setRef(ref(node.uid))}
-            />
+            <RenderNode key={i}
+                        NodeType={node_types[node.node_type]}
+                        node={node}
+                        nodeinfo={Node.nodeinfo ? Node.nodeinfo(node) : {}}
+                        is_selected={selected === node.uid}
+                        node_styles={node_styles}
+                        add_node={add_node}
+                        select_node={select_node}
+                        ref={setRef(ref(node.uid))} />
           )
         })}
       </div>

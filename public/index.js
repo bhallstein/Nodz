@@ -1,7 +1,7 @@
 import {render} from 'react'
 import Nodz from './Nodz'
 
-const node_styles = (selected) => ({
+const node_styles = selected => ({
   backgroundColor: '#f3f3f3',
   padding: '0.5rem',
   borderRadius: '2px',
@@ -34,7 +34,7 @@ const node_styles = (selected) => ({
 function A() {
   return <div style={{width: '6rem'}}>A</div>
 }
-A.nodeinfo = (node, parent, parents) => ({
+A.nodeinfo = (_node, _parent, _parents) => ({
   exits: [
     {
       label: 'No',
@@ -93,11 +93,9 @@ function App() {
   return (
     <div style={{padding: '2rem'}}>
       <div style={{minHeight: '30rem', position: 'relative'}}>
-        <Nodz
-          node_types={node_types}
-          graph={node_graph}
-          node_styles={node_styles}
-        />
+        <Nodz node_types={node_types}
+              graph={node_graph}
+              node_styles={node_styles} />
       </div>
     </div>
   )
