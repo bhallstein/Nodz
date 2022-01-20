@@ -1,6 +1,7 @@
 import {useEffect, useState, useRef} from 'react'
 import use_dynamic_refs from 'use-dynamic-refs'
 import RenderNode, {ErrorNode} from './RenderNode'
+import Picker from './Picker'
 import recursive_reduce from './helpers/recursive-reduce'
 import is_node from './helpers/is-node'
 import calculate_node_layout from './helpers/calculate-node-layout'
@@ -21,6 +22,7 @@ export default function Nodz({node_types, graph, node_styles}) {
   const wrapper_ref = useRef()
   const [needs_layout, set_needs_layout] = useState(true)
   const [selected, set_selected] = useState(null)
+  const [picker, set_picker] = useState(null)
   const [getRef, setRef] = use_dynamic_refs()
 
   const nodes_array = recursive_reduce(
@@ -50,12 +52,16 @@ export default function Nodz({node_types, graph, node_styles}) {
     calculate_node_layout(wrapper_ref, graph, nodes_array)
   }
 
-  function add_node(ref) {
-    const node = nodes_array.find(node => node.ref === ref)
-    !node.children && (node.children = [])
-    const typenames = Object.keys(node_types)
-    const t = typenames[Math.floor(Math.random() * typenames.length)]
-    node.children.push({node_type: t})
+  function open_node_picker(parent_ref, dot_adder_ref) {
+    set_picker({
+      parent_node: nodes_array.find(node => node.ref === parent_ref),
+      dot_adder_ref,
+    })
+  }
+
+  function add_node(parent, new_node) {
+    !parent.children && (parent.children = [])
+    parent.children.push(new_node)
     set_needs_layout(true)
   }
 
@@ -69,7 +75,10 @@ export default function Nodz({node_types, graph, node_styles}) {
       inset: 0,
     }}
          ref={wrapper_ref}
-         onClick={() => select_node(null)}
+         onClick={() => {
+           select_node(null)
+           set_picker(null)
+         }}
     >
       <div style={{
         width: '0',
@@ -102,11 +111,17 @@ export default function Nodz({node_types, graph, node_styles}) {
                         nodeinfo={Node.nodeinfo ? Node.nodeinfo(node) : {}}
                         is_selected={selected === node.uid}
                         node_styles={node_styles}
-                        add_node={add_node}
+                        open_node_picker={open_node_picker}
                         select_node={select_node}
                         ref={setRef(ref(node.uid))} />
           )
         })}
+        {picker && (
+          <Picker node_types={node_types}
+                  picker={picker}
+                  wrapper_ref={wrapper_ref}
+                  add_node={add_node} />
+        )}
       </div>
     </div>
   )

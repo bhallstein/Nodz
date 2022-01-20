@@ -1,5 +1,5 @@
 import {forwardRef} from 'react'
-import PlusCircleOutline from 'simple-react-heroicons/icons/PlusCircleOutline'
+import DotAdder from './DotAdder'
 
 export function ErrorNode({type}) {
   return (
@@ -9,32 +9,15 @@ export function ErrorNode({type}) {
   )
 }
 
-function DotAdder({node, add_node}) {
-  return (
-    <div className="hover-reveal"
-         style={{
-           cursor: 'pointer',
-           position: 'absolute',
-           left: '50%',
-           top: 'calc(100% - 1rem)',
-           transform: 'translateX(-50%)',
-           fontSize: '16px',
-         }}
-         onClick={() => add_node(node.ref)}
-    >
-      <PlusCircleOutline />
-    </div>
-  )
-}
-
 const RenderNode = forwardRef(
   (
-    {NodeType, node, _nodeinfo, is_selected, node_styles, add_node, select_node},
+    {NodeType, node, _nodeinfo, is_selected, node_styles, open_node_picker, select_node},
     ref,
   ) => {
     return (
       <div ref={ref}
            style={{
+             visibility: node.layout ? 'visible' : 'hidden',
              position: 'absolute',
              top: `${node.layout && node.layout.y}px`,
              left: `${node.layout && node.layout.x}px`,
@@ -43,9 +26,7 @@ const RenderNode = forwardRef(
         <div className="group"
              style={{position: 'relative', paddingBottom: '2rem'}}
         >
-          <div style={{
-            ...node_styles(is_selected),
-          }}
+          <div style={node_styles(is_selected)}
                onClick={ev => {
                  select_node(node)
                  ev.stopPropagation()
@@ -53,7 +34,7 @@ const RenderNode = forwardRef(
           >
             {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
           </div>
-          <DotAdder node={node} add_node={add_node} />
+          <DotAdder node={node} open_node_picker={open_node_picker} />
         </div>
       </div>
     )
