@@ -1,6 +1,6 @@
 import {useEffect, useState, useCallback, useRef} from 'react'
 import use_dynamic_refs from 'use-dynamic-refs'
-import RenderNode, {ErrorNode} from './RenderNode'
+import RenderNode from './RenderNode'
 import Picker from './Picker'
 import recursive_reduce from './helpers/recursive-reduce'
 import is_node from './helpers/is-node'
@@ -95,6 +95,7 @@ export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
            set_picker(null)
          }}
     >
+      {/* Dummy nodes */}
       <div style={{
         width: '0',
         height: '0',
@@ -102,35 +103,26 @@ export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
         position: 'absolute',
       }}
       >
-        {nodes_array.map((node, i) => {
-          const Node = node_types[node.node_type]
-          return (
-            <div key={i}
-                 ref={setRef(dummy_ref(node.uid))}
-                 style={{position: 'absolute'}}
-            >
-              <div style={{...node_styles(false)}}>
-                {Node ? <Node /> : <ErrorNode type={node.node_type} />}
-              </div>
-            </div>
-          )
-        })}
+        {nodes_array.map((node, i) => (
+          <RenderNode key={i}
+                      NodeType={node_types[node.node_type]}
+                      node={node}
+                      node_styles={node_styles}
+                      ref={setRef(dummy_ref(node.uid))} />
+        ))}
       </div>
 
       <div>
-        {nodes_array.map((node, i) => {
-          return (
-            <RenderNode key={i}
-                        NodeType={node_types[node.node_type]}
-                        node={node}
-                        nodeinfo={Node.nodeinfo ? Node.nodeinfo(node) : {}}
-                        is_selected={selected === node.uid}
-                        node_styles={node_styles}
-                        open_node_picker={open_node_picker}
-                        select_node={select_node}
-                        ref={setRef(ref(node.uid))} />
-          )
-        })}
+        {nodes_array.map((node, i) => (
+          <RenderNode key={i}
+                      NodeType={node_types[node.node_type]}
+                      node={node}
+                      is_selected={selected === node.uid}
+                      node_styles={node_styles}
+                      open_node_picker={open_node_picker}
+                      select_node={select_node}
+                      ref={setRef(ref(node.uid))} />
+        ))}
         {picker && (
           <Picker node_types={node_types}
                   picker={picker}

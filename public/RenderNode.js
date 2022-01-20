@@ -1,7 +1,11 @@
 import {forwardRef} from 'react'
-import DotAdder from './DotAdder'
+import AddChildBtn from './AddChildBtn'
 
-export function ErrorNode({type}) {
+function empty_obj() {
+  return {}
+}
+
+function ErrorNode({type}) {
   return (
     <div style={{width: '8rem'}}>
       Error: {type} not found in node_types
@@ -11,9 +15,22 @@ export function ErrorNode({type}) {
 
 const RenderNode = forwardRef(
   (
-    {NodeType, node, _nodeinfo, is_selected, node_styles, open_node_picker, select_node},
+    {NodeType, node, is_selected, node_styles, open_node_picker, select_node},
     ref,
   ) => {
+    const {
+      children_type = 'indexed',
+      max_children = -1,
+      children = [],
+    } = (NodeType.options || empty_obj)(node)
+
+    const n_children = (node.children || []).length
+    const at_max_children = (
+      children_type === 'indexed' &&
+      max_children !== -1 &&
+      n_children >= max_children
+    )
+
     return (
       <div ref={ref}
            style={{
@@ -23,19 +40,68 @@ const RenderNode = forwardRef(
              left: `${node.layout && node.layout.x}px`,
            }}
       >
-        <div className="group"
-             style={{position: 'relative', paddingBottom: '2rem'}}
-        >
-          <div style={node_styles(is_selected)}
-               onClick={ev => {
-                 select_node(node)
-                 ev.stopPropagation()
+        {children_type === 'indexed' && (
+          <div className="group"
+               style={{
+                 position: 'relative',
+                 paddingBottom: '2rem',
                }}
           >
-            {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
+            <div style={node_styles(is_selected)}
+                 onClick={ev => {
+                   select_node(node)
+                   ev.stopPropagation()
+                 }}
+            >
+              {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
+            </div>
+
+            <AddChildBtn node={node}
+                         open_node_picker={open_node_picker}
+                         disabled={at_max_children} />
           </div>
-          <DotAdder node={node} open_node_picker={open_node_picker} />
-        </div>
+        )}
+
+        {children_type === 'named' && (
+          <div>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+              <div style={{display: 'inline-block', ...node_styles(false)}}>
+                {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
+              </div>
+            </div>
+
+            <div style={{
+              marginTop: '1.2rem',
+              marginLeft: '-1.5rem',
+              marginRight: '-1.5rem',
+            }}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+              >
+                {children.map((child_spec, i) => (
+                  <div key={child_spec.name}
+                       className="group"
+                       style={{
+                         display: 'inline-block',
+                         position: 'relative',
+                         paddingBottom: '2rem',
+                         marginRight: i === children.length - 1 ? 0 : '1rem',
+                       }}
+                  >
+                    <div style={node_styles(false)}>
+                      {child_spec.name}
+                    </div>
+                    <AddChildBtn node={node}
+                                 open_node_picker={open_node_picker} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   },

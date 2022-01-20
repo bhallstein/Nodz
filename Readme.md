@@ -46,3 +46,33 @@ function App() {
 
 render(<App />, document.body)
 ```
+
+
+## Children types
+
+Node exit types:
+
+- indexed - numeric children
+          - default
+          - render as line to AddChildBtn
+          - optional settings: max
+          - e.g.: {children_type: 'simple', max_children: 3}
+- named - a set of named children
+        - render as, originating from the parent node, a set of mini-nodes (one for each named child), each then leading to a AddChildBtn
+        - each child has optional setting: max
+        - e.g.:
+          {
+            children_type: 'named',
+            children: [
+              {name: 'True'},
+              {name: 'False', max: 2},
+            ]
+          }
+- none - children are not allowed
+       - e.g.: {children_type: 'none'}
+
+NB: all 'plus' interaction points should either use a preset node type, or
+//     call out to user code to get the node types & descriptions amically
+    (so allowing a node to customise its possible children based on context)
+    (or, use user-supplied react elements instead of built in)
+- Allow external elements to be passed into node addition popover
