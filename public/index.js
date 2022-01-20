@@ -34,18 +34,18 @@ const node_styles = selected => ({
 function A() {
   return <div style={{width: '6rem'}}>A</div>
 }
-A.nodeinfo = (_node, _parent, _parents) => ({
-  exits: [
-    {
-      label: 'No',
-      value: false,
-    },
-    {
-      label: 'Yes',
-      value: true,
-    },
-  ],
-})
+// A.nodeinfo = (_node, _parent, _parents) => ({
+//   exits: [
+//     {
+//       label: 'No',
+//       value: false,
+//     },
+//     {
+//       label: 'Yes',
+//       value: true,
+//     },
+//   ],
+// })
 
 function B() {
   return <div style={{width: '7rem', height: '6rem'}}>B</div>
@@ -58,35 +58,6 @@ function C() {
 const node_types = {A, B, C}
 const node_graph = {
   node_type: 'A',
-  // children: [
-  //   {
-  //     node_type: 'B',
-  //     children: [
-  //       {
-  //         node_type: 'A',
-  //       },
-  //       {
-  //         node_type: 'C',
-  //         children: [
-  //           {
-  //             node_type: 'B',
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     node_type: 'A',
-  //     children: [
-  //       {
-  //         node_type: 'A',
-  //       },
-  //       {
-  //         node_type: 'B',
-  //       },
-  //     ],
-  //   },
-  // ],
 }
 
 function App() {
@@ -95,10 +66,52 @@ function App() {
       <div style={{minHeight: '30rem', position: 'relative'}}>
         <Nodz node_types={node_types}
               graph={node_graph}
-              node_styles={node_styles} />
+              node_styles={node_styles}
+              CustomPicker={null} />
       </div>
     </div>
   )
 }
 
 render(<App />, document.body)
+
+// function MyCustomPicker({node_types, parent, add_node}) {
+//   return (
+//     <div>
+//       My CustomPicker
+//       <div onClick={() => add_node(parent, {node_type: 'B'})}>
+//         Add B
+//       </div>
+//     </div>
+//   )
+// }
+
+// children: [
+//   {
+//     node_type: 'B',
+//     children: [
+//       {
+//         node_type: 'A',
+//       },
+//       {
+//         node_type: 'C',
+//         children: [
+//           {
+//             node_type: 'B',
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     node_type: 'A',
+//     children: [
+//       {
+//         node_type: 'A',
+//       },
+//       {
+//         node_type: 'B',
+//       },
+//     ],
+//   },
+// ],

@@ -1,10 +1,11 @@
-import {useEffect, useState, useRef} from 'react'
+import {useEffect, useState, useCallback, useRef} from 'react'
 import use_dynamic_refs from 'use-dynamic-refs'
 import RenderNode, {ErrorNode} from './RenderNode'
 import Picker from './Picker'
 import recursive_reduce from './helpers/recursive-reduce'
 import is_node from './helpers/is-node'
 import calculate_node_layout from './helpers/calculate-node-layout'
+import recurse from './helpers/recurse'
 
 function ref(i) {
   return `${i}-ref`
@@ -18,12 +19,18 @@ function uid() {
   return (uid_counter += 1)
 }
 
-export default function Nodz({node_types, graph, node_styles}) {
+export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
   const wrapper_ref = useRef()
   const [needs_layout, set_needs_layout] = useState(true)
-  const [selected, set_selected] = useState(null)
+  const [selected, do_set_selected] = useState(null)
+  const selected_ref = useRef(null)
   const [picker, set_picker] = useState(null)
   const [getRef, setRef] = use_dynamic_refs()
+
+  function set_selected(node_uid) {
+    selected_ref.current = node_uid
+    do_set_selected(node_uid)
+  }
 
   const nodes_array = recursive_reduce(
     graph,
@@ -43,9 +50,7 @@ export default function Nodz({node_types, graph, node_styles}) {
   )
   useEffect(() => {
     window.addEventListener('resize', () => set_needs_layout(true))
-    // window.addEventListener('keydown', (ev) => {
-    //   console.log('//ev/', ev)
-    // })
+    window.addEventListener('keydown', ev => delete_node(ev))
   }, [])
 
   if (!needs_layout) {
@@ -69,11 +74,21 @@ export default function Nodz({node_types, graph, node_styles}) {
     set_selected(n ? n.uid : null)
   }
 
+  const delete_node = useCallback(ev => {
+    const uid_selected = selected_ref.current
+    if (uid_selected && ev.key === 'Backspace') {
+      recurse(graph, n => {
+        if (is_node(n) && n.children) {
+          n.children = n.children.filter(child => child.uid !== uid_selected)
+        }
+      })
+      set_selected(null)
+      set_needs_layout(true)
+    }
+  }, [selected, nodes_array])
+
   return (
-    <div style={{
-      position: 'absolute',
-      inset: 0,
-    }}
+    <div style={{position: 'absolute', inset: 0}}
          ref={wrapper_ref}
          onClick={() => {
            select_node(null)
@@ -120,7 +135,8 @@ export default function Nodz({node_types, graph, node_styles}) {
           <Picker node_types={node_types}
                   picker={picker}
                   wrapper_ref={wrapper_ref}
-                  add_node={add_node} />
+                  add_node={add_node}
+                  CustomPicker={CustomPicker} />
         )}
       </div>
     </div>

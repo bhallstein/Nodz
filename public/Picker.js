@@ -11,7 +11,8 @@ export default function Picker({node_types, picker, wrapper_ref, CustomPicker, a
     >
       {CustomPicker && (
         <CustomPicker node_types={node_types}
-                      parent={picker.parent_node} />
+                      parent={picker.parent_node}
+                      add_node={add_node} />
       )}
 
       {!CustomPicker && (
