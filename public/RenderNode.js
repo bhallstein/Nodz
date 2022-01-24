@@ -1,9 +1,7 @@
 import {forwardRef} from 'react'
 import AddChildBtn from './AddChildBtn'
 
-function empty_obj() {
-  return {}
-}
+const empty_obj = () => ({})
 
 function ErrorNode({type}) {
   return (

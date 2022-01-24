@@ -7,12 +7,8 @@ import is_node from './helpers/is-node'
 import calculate_node_layout from './helpers/calculate-node-layout'
 import recurse from './helpers/recurse'
 
-function ref(i) {
-  return `${i}-ref`
-}
-function dummy_ref(i) {
-  return `${i}-dummy-ref`
-}
+const ref = (i) => `${i}-ref`
+const dummy_ref = (i) => `${i}-dummy-ref`
 
 let uid_counter = 0
 function uid() {
