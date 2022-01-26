@@ -34,6 +34,13 @@ const RenderNode = forwardRef(
       ev.stopPropagation()
     }
 
+    const add_btn_style = {
+      position: 'absolute',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      top: 'calc(100% - 1rem)',
+    }
+
     return (
       <div ref={ref}
            class="render-node"
@@ -59,7 +66,8 @@ const RenderNode = forwardRef(
 
             <AddChildBtn node={node}
                          open_node_picker={open_node_picker}
-                         disabled={at_max_children} />
+                         disabled={at_max_children}
+                         style={add_btn_style} />
           </div>
         )}
 
@@ -92,7 +100,8 @@ const RenderNode = forwardRef(
                     {child_spec.name}
                   </div>
                   <AddChildBtn node={node}
-                               open_node_picker={open_node_picker} />
+                               open_node_picker={open_node_picker}
+                               style={add_btn_style} />
                 </div>
               ))}
             </div>

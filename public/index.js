@@ -36,10 +36,14 @@ function C() {
 
 const node_types = {A, B, C}
 const node_graph = {
-  node_type: 'A',
-  children: [
+  nodes: [
     {
-      node_type: 'B',
+      node_type: 'A',
+      children: [
+        {
+          node_type: 'B',
+        },
+      ],
     },
   ],
 }

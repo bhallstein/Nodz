@@ -11,7 +11,7 @@ export default function Picker({node_types, picker, wrapper_ref, CustomPicker, a
     >
       {CustomPicker && (
         <CustomPicker node_types={node_types}
-                      parent={picker.parent_node}
+                      parent={picker.parent}
                       add_node={add_node} />
       )}
 
@@ -26,7 +26,7 @@ export default function Picker({node_types, picker, wrapper_ref, CustomPicker, a
                  style={{borderBottom: '1px solid #eaeaea'}}
             >
               <div style={{padding: '0.5rem 1rem', cursor: 'pointer'}}
-                   onClick={() => add_node(picker.parent_node, {node_type: typename})}
+                   onClick={() => add_node(picker.parent, {node_type: typename})}
               >
                 {typename}
               </div>
