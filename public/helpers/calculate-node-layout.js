@@ -38,15 +38,15 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
   })
 
   // Assign cumulative child widths to all nodes by depth-first recursion
-  nodes_array.forEach(n => (n.recursive_width = null))
   recurse(graph, null, n => {
     if (!is_node(n)) {
       return
     }
     const children = n.children || []
-    const children_width =
+    const children_width = (
       children.reduce((carry, child) => carry + child.layout.w__calculated, 0) +
       Math.max(children.length - 1, 0) * h_padding
+    )
     n.layout.w__calculated = Math.max(children_width, n.layout.w__intrinsic)
   })
 

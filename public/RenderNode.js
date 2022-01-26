@@ -29,8 +29,14 @@ const RenderNode = forwardRef(
       n_children >= max_children
     )
 
+    function click(ev) {
+      select_node && select_node(node)
+      ev.stopPropagation()
+    }
+
     return (
       <div ref={ref}
+           class="render-node"
            style={{
              visibility: node.layout ? 'visible' : 'hidden',
              position: 'absolute',
@@ -46,10 +52,7 @@ const RenderNode = forwardRef(
                }}
           >
             <div style={node_styles(is_selected)}
-                 onClick={ev => {
-                   select_node(node)
-                   ev.stopPropagation()
-                 }}
+                 onClick={click}
             >
               {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
             </div>
@@ -63,40 +66,35 @@ const RenderNode = forwardRef(
         {children_type === 'named' && (
           <div>
             <div style={{display: 'flex', justifyContent: 'center'}}>
-              <div style={{display: 'inline-block', ...node_styles(false)}}>
+              <div style={{display: 'inline-block', ...node_styles(is_selected)}}
+                   onClick={click}
+              >
                 {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
               </div>
             </div>
 
             <div style={{
               marginTop: '1.2rem',
-              marginLeft: '-1.5rem',
-              marginRight: '-1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
             }}
             >
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}
-              >
-                {children.map((child_spec, i) => (
-                  <div key={child_spec.name}
-                       className="group"
-                       style={{
-                         display: 'inline-block',
-                         position: 'relative',
-                         paddingBottom: '2rem',
-                         marginRight: i === children.length - 1 ? 0 : '1rem',
-                       }}
-                  >
-                    <div style={node_styles(false)}>
-                      {child_spec.name}
-                    </div>
-                    <AddChildBtn node={node}
-                                 open_node_picker={open_node_picker} />
+              {children.map((child_spec, i) => (
+                <div key={child_spec.name}
+                     className="group"
+                     style={{
+                       position: 'relative',
+                       paddingBottom: '2rem',
+                       marginRight: i === children.length - 1 ? 0 : '1rem',
+                     }}
+                >
+                  <div style={{cursor: 'default', ...node_styles(false)}}>
+                    {child_spec.name}
                   </div>
-                ))}
-              </div>
+                  <AddChildBtn node={node}
+                               open_node_picker={open_node_picker} />
+                </div>
+              ))}
             </div>
           </div>
         )}

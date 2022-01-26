@@ -8,7 +8,7 @@ export default function AddChildBtn({node, open_node_picker, disabled}) {
     <div ref={ref}
          className="hover-reveal"
          style={{
-           cursor: disabled ? 'auto' : 'pointer',
+           cursor: disabled ? 'default' : 'pointer',
            position: 'absolute',
            left: '50%',
            top: 'calc(100% - 1rem)',

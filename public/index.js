@@ -12,18 +12,20 @@ const node_styles = selected => ({
 function A() {
   return <div style={{width: '6rem'}}>A</div>
 }
-A.options = (node, parent) => ({
+A.options = (_node, _parent) => ({
   max_children: 3,
 })
 
 function B() {
   return <div style={{width: '7rem', height: '6rem'}}>B</div>
 }
-B.options = (node, parent) => ({
+B.options = (_node, _parent) => ({
   children_type: 'named',
   children: [
     {name: 'True'},
     {name: 'False'},
+    // {name: 'Maybe'},
+    // {name: 'Perhaps'},
     // {name: 'Neither true nor false'},
   ],
 })

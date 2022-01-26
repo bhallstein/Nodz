@@ -96,7 +96,6 @@ export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
         width: '0',
         height: '0',
         overflow: 'hidden',
-        position: 'absolute',
       }}
       >
         {nodes_array.map((node, i) => (
@@ -108,6 +107,7 @@ export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
         ))}
       </div>
 
+      {/* UI */}
       <div>
         {nodes_array.map((node, i) => (
           <RenderNode key={i}
