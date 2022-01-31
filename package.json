@@ -3,7 +3,8 @@
     "dev": "wmr -p 1234 --reload",
     "build": "wmr build",
     "serve": "wmr serve -p 1234",
-    "lint": "eslint --fix ."
+    "lint": "eslint --fix .",
+    "test": "npm run --prefix public/helpers test"
   },
   "dependencies": {
     "preact": "^10.6.4",

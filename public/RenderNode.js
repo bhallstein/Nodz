@@ -73,14 +73,13 @@ const RenderNode = forwardRef(
 
         {children_type === 'named' && (
           <div>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
+            <div style={{padding: '0 1rem'}}>
               <div style={{display: 'inline-block', ...node_styles(is_selected)}}
                    onClick={click}
               >
                 {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
               </div>
             </div>
-
             <div style={{
               marginTop: '1.2rem',
               display: 'flex',

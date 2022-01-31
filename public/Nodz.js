@@ -6,6 +6,7 @@ import recursive_reduce from './helpers/recursive-reduce'
 import is_node from './helpers/is-node'
 import calculate_node_layout from './helpers/calculate-node-layout'
 import recurse from './helpers/recurse'
+import make_rendergraph from './helpers/make-rendergraph'
 import AddChildBtn from './AddChildBtn'
 
 const ref = i => `${i}-ref`
@@ -20,9 +21,11 @@ export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
   const wrapper_ref = useRef()
   const [needs_layout, set_needs_layout] = useState(true)
   const [selected, do_set_selected] = useState(null)
-  const selected_ref = useRef(null)   // To prevent stale references in callbacks
+  const selected_ref = useRef(null)   // Prevents stale references in callbacks
   const [picker, set_picker] = useState(null)
   const [getRef, setRef] = use_dynamic_refs()
+  const rendergraph = make_rendergraph(graph)
+  console.log('//rendergraph/', rendergraph)
 
   function set_selected(node_uid) {
     selected_ref.current = node_uid

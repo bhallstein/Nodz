@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "scripts": {
+    "test": "ava ./tests/*.js",
+    "w": "npm run test -- --watch"
+  },
+  "devDependencies": {
+    "ava": "^4.0.1",
+    "esm": "^3.2.25"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  }
+}
