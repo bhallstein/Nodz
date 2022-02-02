@@ -1,39 +1,32 @@
-import recursive_reduce from './recursive-reduce.js'
-import is_node from './is-node.js'
-
-function find_rendernode(rendernodes, node) {
-  return rendernodes.find(rn => rn.node === node) || null
-}
+import reduce from './reduce.js'
+import is_array from './is-array.js'
+import is_obj from './is-obj.js'
+import wrap_up from './wrap-up.js'
 
 function mk_rendernode(node) {
-  const rg_node = {node}
-  return rg_node
-}
+  const rn = {node}
 
-function mk_rendernode_array(graph) {
-  return recursive_reduce(graph, (carry, node) => {
-    is_node(node) && carry.push(mk_rendernode(node))
-    return carry
-  }, [])
-}
+  // Indexed children
+  if (is_array(node.children)) {
+    rn.children = node.children.map(mk_rendernode)
+  }
 
-function set_rendernode_children(rendernodes, rn) {
-  rn.children = (rn.node.children || []).map(child => find_rendernode(rendernodes, child))
-}
+  // Named children: create pseudonodes
+  else if (is_obj(node.children)) {
+    rn.children = reduce(node.children, (carry, key, children_for_key) => {
+      const children = wrap_up(children_for_key).map(mk_rendernode)
+      carry.push({
+        node: 'Pseudo',
+        key,
+        children,
+      })
+      return carry
+    }, [])
+  }
 
-function set_rendernode_pseudochildren(rendernodes, rn) {
-  rn.pseudo_children = []
+  return rn
 }
 
 export default function make_rendergraph(graph) {
-  const rendernodes = mk_rendernode_array(graph)
-
-  return recursive_reduce(graph, (carry, node) => {
-    if (is_node(node)) {
-      const rn = find_rendernode(rendernodes, node)
-      set_rendernode_children(rendernodes, rn)
-      set_rendernode_pseudochildren(rendernodes, rn)
-    }
-    return carry
-  }, [rendernodes[0]])
+  return graph.nodes.map(mk_rendernode)
 }
