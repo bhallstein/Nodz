@@ -7,6 +7,8 @@ export default function calculate_node_layout(wrapper, graph, nodes_array) {
     return
   }
 
+  console.log('//cnl/', wrapper, graph, nodes_array)
+
   const v_padding = 50
   const h_padding = 50
   const container_w = wrapper.current.getBoundingClientRect().width

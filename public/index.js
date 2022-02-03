@@ -39,16 +39,12 @@ const graph = {
   nodes: [
     {
       node_type: 'B',
-      // children: {
-      //   true: [
-      //     {node_type: 'A'},
-      //   ],
+      // children: [
+      //   {node_type: 'A'},
       // },
-      children: [
-        {
-          node_type: 'B',
-        },
-      ],
+      children: {
+        true: {node_type: 'A'},
+      },
     },
   ],
 }

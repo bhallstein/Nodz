@@ -1,7 +1,7 @@
 import {forwardRef} from 'react'
 import AddChildBtn from './AddChildBtn'
 
-const empty_obj = () => ({})
+const nullobj = () => ({})
 
 function ErrorNode({type}) {
   return (
@@ -13,14 +13,14 @@ function ErrorNode({type}) {
 
 const RenderNode = forwardRef(
   (
-    {NodeType, node, is_selected, node_styles, open_node_picker, select_node},
+    {NodeType, rn, is_selected, node_styles, open_node_picker, select_node},
     ref,
   ) => {
     const {
       children_type = 'indexed',
       max_children = -1,
       children = [],
-    } = (NodeType.options || empty_obj)(node)
+    } = (NodeType.options || nullobj)(rn.node)
 
     const n_children = (node.children || []).length
     const at_max_children = (
