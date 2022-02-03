@@ -2,9 +2,11 @@ import reduce from './reduce.js'
 import is_array from './is-array.js'
 import is_obj from './is-obj.js'
 import wrap_up from './wrap-up.js'
+import {get_uid} from './uids.js'
 
 function mk_rendernode(node) {
-  const rn = {node}
+  const uid = get_uid(node)
+  const rn = {node, uid}
 
   // Indexed children
   if (is_array(node.children)) {
@@ -13,15 +15,12 @@ function mk_rendernode(node) {
 
   // Named children: create pseudonodes
   else if (is_obj(node.children)) {
-    rn.children = reduce(node.children, (carry, key, children_for_key) => {
-      const children = wrap_up(children_for_key).map(mk_rendernode)
-      carry.push({
-        node: 'Pseudo',
-        key,
-        children,
-      })
-      return carry
-    }, [])
+    rn.children = reduce(node.children, (carry, key, children_for_key) => carry.concat({
+      node: 'Pseudo',
+      key,
+      uid: `${uid}/${key}`,
+      children: wrap_up(children_for_key).map(mk_rendernode),
+    }), [])
   }
 
   return rn

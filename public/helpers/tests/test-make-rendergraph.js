@@ -21,27 +21,41 @@ const graph = {
 }
 
 t('make_rendergraph: converts to rendergraph', t => {
-  const render_graph = make_rendergraph(graph)
+  const rendergraph = make_rendergraph(graph)
   const expected = [
     {
       node: graph.nodes[0],
+      uid: 1,
       children: [
-        {node: {node_type: 'A'}},
-        {node: {node_type: 'B'}},
-        {node: graph.nodes[0].children[2], children: [
+        {node: graph.nodes[0].children[0], uid: 2},
+        {node: graph.nodes[0].children[1], uid: 3},
+        {node: graph.nodes[0].children[2], uid: 4, children: [
           {
             node: 'Pseudo',
             key: 'true',
-            children: [{node: {node_type: 'A'}}, {node: {node_type: 'B'}}],
+            uid: '4/true',
+            children: [{node: {node_type: 'A'}, uid: 5}, {node: {node_type: 'B'}, uid: 6}],
           },
           {
             node: 'Pseudo',
             key: 'false',
-            children: [{node: {node_type: 'C'}}],
+            uid: '4/false',
+            children: [{node: {node_type: 'C'}, uid: 7}],
           },
         ]},
       ],
     },
   ]
-  t.deepEqual(render_graph, expected)
+  t.deepEqual(rendergraph, expected)
+})
+
+t('make_rendergraph: preserves uids between referentially equal nodes', t => {
+  const rendergraph = make_rendergraph(graph)
+  t.is(1, rendergraph[0].uid)
+})
+// NOTE: therefore, if nodes are to be treated as distinct, they must not be referentially
+//       equal (even if they are identical) -- Nodz should perhaps throw if any are equal?
+
+t('make_rendergraph: copes with empty graph', t => {
+  t.deepEqual([], make_rendergraph({nodes: []}))
 })
