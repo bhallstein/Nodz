@@ -1,5 +1,6 @@
 import t from 'ava'
-import make_rendergraph from '../make-rendergraph.js'
+import is_rendernode from '../is-rendernode.js'
+import {make_rendergraph, flatten_rendergraph} from '../make-rendergraph.js'
 
 const graph = {
   nodes: [
@@ -31,13 +32,13 @@ t('make_rendergraph: converts to rendergraph', t => {
         {node: graph.nodes[0].children[1], uid: 3},
         {node: graph.nodes[0].children[2], uid: 4, children: [
           {
-            node: 'Pseudo',
+            node: {node_type: 'Pseudo'},
             key: 'true',
             uid: '4/true',
             children: [{node: {node_type: 'A'}, uid: 5}, {node: {node_type: 'B'}, uid: 6}],
           },
           {
-            node: 'Pseudo',
+            node: {node_type: 'Pseudo'},
             key: 'false',
             uid: '4/false',
             children: [{node: {node_type: 'C'}, uid: 7}],
@@ -58,4 +59,25 @@ t('make_rendergraph: preserves uids between referentially equal nodes', t => {
 
 t('make_rendergraph: copes with empty graph', t => {
   t.deepEqual([], make_rendergraph({nodes: []}))
+})
+
+t('flatten_rendergraph: flattens', t => {
+  const rg = make_rendergraph(graph)
+  const rn_array = flatten_rendergraph(rg)
+  const exp = [
+    'A',
+    'A',
+    'B',
+    'C',
+    'Pseudo',
+    'A',
+    'B',
+    'Pseudo',
+    'C',
+  ]
+
+  rn_array.forEach((rn, i) => {
+    t.true(is_rendernode(rn))
+    t.is(exp[i], rn.node.node_type)
+  })
 })
