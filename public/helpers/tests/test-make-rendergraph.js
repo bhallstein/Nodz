@@ -21,8 +21,65 @@ const graph = {
   ],
 }
 
+function A() {}
+function B() {}
+function C() {}
+function D() {}
+
+B.options = () => ({max_children: 1})
+C.options = () => ({
+  children_type: 'named',
+  children: [
+    {name: 'false', max: 1},
+    {name: 'true'},
+  ],
+})
+
+
+const node_types = {A, B, C, D}
+
+
+t('make_rendergraph: throws if invalid node_type', t => {
+  const func = () => make_rendergraph(
+    {nodes: [{node_type: 'Q'}]},
+    node_types,
+  )
+  t.throws(func, {message: 'invalid node_type'})
+})
+
+
+t('make_rendergraph: throws if children do not match node options', t => {
+  const indexed = () => make_rendergraph(
+    {nodes: [{node_type: 'A', children: {}}]},
+    node_types,
+  )
+  const indexed_too_many = () => make_rendergraph(
+    {nodes: [{node_type: 'B', children: [{node_type: 'A'}, {node_type: 'B'}]}]},
+    node_types,
+  )
+  const named = () => make_rendergraph(
+    {nodes: [{node_type: 'C', children: []}]},
+    node_types,
+  )
+  const named_too_many = () => make_rendergraph(
+    {nodes: [{node_type: 'C', children: {false: [{node_type: 'A'}, {node_type: 'B'}]}}]},
+    node_types,
+  )
+  const named_non_match_spec = () => make_rendergraph(
+    {nodes: [{node_type: 'C', children: {maybe: {node_type: 'A'}}}]},
+    node_types,
+  )
+
+  t.throws(indexed, {message: 'children do not match node_options'})
+  t.throws(indexed_too_many, {message: 'children do not match node_options'})
+  t.throws(named, {message: 'children do not match node_options'})
+  t.throws(named_too_many, {message: 'children do not match node_options'})
+  t.throws(named_non_match_spec, {message: 'children do not match node_options'})
+})
+
+
 t('make_rendergraph: converts to rendergraph', t => {
-  const rendergraph = make_rendergraph(graph)
+  const rg = make_rendergraph(graph, node_types)
   const expected = [
     {
       node: graph.nodes[0],
@@ -47,22 +104,25 @@ t('make_rendergraph: converts to rendergraph', t => {
       ],
     },
   ]
-  t.deepEqual(rendergraph, expected)
+  t.deepEqual(expected, rg)
 })
 
+
 t('make_rendergraph: preserves uids between referentially equal nodes', t => {
-  const rendergraph = make_rendergraph(graph)
-  t.is(1, rendergraph[0].uid)
+  const rg = make_rendergraph(graph, node_types)
+  t.is(1, rg[0].uid)
 })
 // NOTE: therefore, if nodes are to be treated as distinct, they must not be referentially
 //       equal (even if they are identical) -- Nodz should perhaps throw if any are equal?
+
 
 t('make_rendergraph: copes with empty graph', t => {
   t.deepEqual([], make_rendergraph({nodes: []}))
 })
 
+
 t('flatten_rendergraph: flattens', t => {
-  const rg = make_rendergraph(graph)
+  const rg = make_rendergraph(graph, node_types)
   const rn_array = flatten_rendergraph(rg)
   const exp = [
     'A',
@@ -77,7 +137,7 @@ t('flatten_rendergraph: flattens', t => {
   ]
 
   rn_array.forEach((rn, i) => {
-    t.true(is_rendernode(rn))
+    t.truthy(is_rendernode(rn))
     t.is(exp[i], rn.node.node_type)
   })
 })
