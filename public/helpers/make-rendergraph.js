@@ -9,6 +9,7 @@ import get_node_options from './get-node-options.js'
 
 
 // Error checking
+// ------------------------------
 
 function indexed_children_ok(children, options) {
   if (!is_array(children)) {
@@ -29,7 +30,7 @@ function named_children_ok(children, options) {
   return reduce(children || { }, (carry, child_name, child_value) => {
     const options_for_child = allowed_children.find(item => item.name === child_name)
     const length_exceeded = (
-      options_for_child?.max && is_array(child_value) && child_value.length > options_for_child.max
+      options_for_child?.max_children && is_array(child_value) && child_value.length > options_for_child.max_children
     )
     return carry && options_for_child && !length_exceeded
   }, true)
@@ -41,6 +42,7 @@ function error__children_mismatch() {
 
 
 // mk_rendernode
+// ------------------------------
 
 function mk_rendernode(node, node_types) {
   const node_type = node_types[node.node_type]
@@ -51,8 +53,6 @@ function mk_rendernode(node, node_types) {
   const opts = get_node_options(node_type)
   const children = node.children
 
-  // console.log('//node/', node, opts)
-
   // Check children
   if (opts.children_type === 'indexed' && children) {
     !indexed_children_ok(children, opts) && error__children_mismatch()
@@ -62,7 +62,7 @@ function mk_rendernode(node, node_types) {
   }
 
   const uid = get_uid(node)
-  const rn = {node, uid}
+  const rn = {node, uid, opts}
 
   // Indexed children
   if (opts.children_type === 'indexed' && children?.length) {
@@ -71,12 +71,16 @@ function mk_rendernode(node, node_types) {
 
   // Named children: create pseudonodes
   else if (opts.children_type === 'named' && Object.keys(children || {}).length) {
-    rn.children = reduce((children || { }), (carry, key, children_for_key) => carry.concat({
-      node: {node_type: 'Pseudo'},
-      key,
-      uid: `${uid}/${key}`,
-      children: wrap_up(children_for_key).map(child => mk_rendernode(child, node_types)),
-    }), [])
+    rn.children = reduce((children || { }), (carry, key, children_for_key) => {
+      const child_opts = {...opts.children.find(ch_opt => ch_opt.name === key)}
+      return carry.concat({
+        node: {node_type: 'Pseudo'},
+        key,
+        uid: `${uid}/${key}`,
+        opts: {...child_opts, children_type: 'indexed'},
+        children: wrap_up(children_for_key).map(child => mk_rendernode(child, node_types)),
+      })
+    }, [])
   }
 
   return rn
@@ -84,6 +88,7 @@ function mk_rendernode(node, node_types) {
 
 
 // exports
+// ------------------------------
 
 export function make_rendergraph(graph, node_types) {
   return graph.nodes.map(n => mk_rendernode(n, node_types))

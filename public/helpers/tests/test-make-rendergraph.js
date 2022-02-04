@@ -1,6 +1,8 @@
 import t from 'ava'
 import is_rendernode from '../is-rendernode.js'
 import {make_rendergraph, flatten_rendergraph} from '../make-rendergraph.js'
+import get_node_options from '../get-node-options.js'
+import {get_node} from '../uids.js'
 
 const graph = {
   nodes: [
@@ -30,7 +32,7 @@ B.options = () => ({max_children: 1})
 C.options = () => ({
   children_type: 'named',
   children: [
-    {name: 'false', max: 1},
+    {name: 'false', max_children: 1},
     {name: 'true'},
   ],
 })
@@ -84,23 +86,34 @@ t('make_rendergraph: converts to rendergraph', t => {
     {
       node: graph.nodes[0],
       uid: 1,
+      opts: get_node_options(),
       children: [
-        {node: graph.nodes[0].children[0], uid: 2},
-        {node: graph.nodes[0].children[1], uid: 3},
-        {node: graph.nodes[0].children[2], uid: 4, children: [
-          {
-            node: {node_type: 'Pseudo'},
-            key: 'true',
-            uid: '4/true',
-            children: [{node: {node_type: 'A'}, uid: 5}, {node: {node_type: 'B'}, uid: 6}],
-          },
-          {
-            node: {node_type: 'Pseudo'},
-            key: 'false',
-            uid: '4/false',
-            children: [{node: {node_type: 'C'}, uid: 7}],
-          },
-        ]},
+        {node: graph.nodes[0].children[0], uid: 2, opts: get_node_options()},
+        {node: graph.nodes[0].children[1], uid: 3, opts: get_node_options(B)},
+        {
+          node: graph.nodes[0].children[2],
+          uid: 4,
+          opts: get_node_options(C),
+          children: [
+            {
+              node: {node_type: 'Pseudo'},
+              key: 'true',
+              uid: '4/true',
+              opts: {...get_node_options(C).children[1], children_type: 'indexed'},
+              children: [
+                {node: {node_type: 'A'}, uid: 5, opts: get_node_options()},
+                {node: {node_type: 'B'}, uid: 6, opts: get_node_options(B)},
+              ],
+            },
+            {
+              node: {node_type: 'Pseudo'},
+              key: 'false',
+              uid: '4/false',
+              opts: {...get_node_options(C).children[0], children_type: 'indexed'},
+              children: [{node: {node_type: 'C'}, uid: 7, opts: get_node_options(C)}],
+            },
+          ],
+        },
       ],
     },
   ]
