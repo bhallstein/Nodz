@@ -1,5 +1,11 @@
-export default function Picker({node_types, picker, wrapper_ref, CustomPicker, add_node}) {
-  const rect = picker.dot_adder_ref.current.getBoundingClientRect()
+export default function NodePicker({
+  node_types,
+  picker,
+  wrapper_ref,
+  CustomPicker,
+  add_node,
+}) {
+  const rect = picker.add_node_btn_ref.current.getBoundingClientRect()
   const wrapper_rect = wrapper_ref.current.getBoundingClientRect()
 
   return (
@@ -9,12 +15,6 @@ export default function Picker({node_types, picker, wrapper_ref, CustomPicker, a
       top: `${rect.top - wrapper_rect.top - 10}px`,
     }}
     >
-      {CustomPicker && (
-        <CustomPicker node_types={node_types}
-                      parent={picker.parent}
-                      add_node={add_node} />
-      )}
-
       {!CustomPicker && (
         <div style={{
           backgroundColor: 'white',
@@ -33,6 +33,12 @@ export default function Picker({node_types, picker, wrapper_ref, CustomPicker, a
             </div>
           ))}
         </div>
+      )}
+
+      {CustomPicker && (
+        <CustomPicker node_types={node_types}
+                      parent={picker.parent}
+                      add_node={add_node} />
       )}
     </div>
   )
