@@ -70,15 +70,18 @@ function mk_rendernode(node, node_types) {
   }
 
   // Named children: create pseudonodes
-  else if (opts.children_type === 'named' && Object.keys(children || {}).length) {
-    rn.children = reduce((children || { }), (carry, key, children_for_key) => {
-      const child_opts = {...opts.children.find(ch_opt => ch_opt.name === key)}
+  else if (opts.children_type === 'named') {
+    rn.children = opts.children.reduce((carry, child_opts) => {
+      const key = child_opts.name
+      const children_array = wrap_up((children || { })[key] || [])
+        .map(child => mk_rendernode(child, node_types))
+
       return carry.concat({
         node: {node_type: 'Pseudo'},
         key,
         uid: `${uid}/${key}`,
         opts: {...child_opts, children_type: 'indexed'},
-        children: wrap_up(children_for_key).map(child => mk_rendernode(child, node_types)),
+        ...(children_array.length ? {children: children_array} : { }),
       })
     }, [])
   }

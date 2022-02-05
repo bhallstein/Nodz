@@ -2,7 +2,6 @@ import t from 'ava'
 import is_rendernode from '../is-rendernode.js'
 import {make_rendergraph, flatten_rendergraph} from '../make-rendergraph.js'
 import get_node_options from '../get-node-options.js'
-import {get_node} from '../uids.js'
 
 const graph = {
   nodes: [
@@ -15,7 +14,7 @@ const graph = {
           node_type: 'C',
           children: {
             'true': [{node_type: 'A'}, {node_type: 'B'}],
-            'false': {node_type: 'C'},
+            'false': {node_type: 'A'},
           },
         },
       ],
@@ -36,7 +35,6 @@ C.options = () => ({
     {name: 'true'},
   ],
 })
-
 
 const node_types = {A, B, C, D}
 
@@ -88,8 +86,8 @@ t('make_rendergraph: converts to rendergraph', t => {
       uid: 1,
       opts: get_node_options(),
       children: [
-        {node: graph.nodes[0].children[0], uid: 2, opts: get_node_options()},
-        {node: graph.nodes[0].children[1], uid: 3, opts: get_node_options(B)},
+        {node: {node_type: 'A'}, uid: 2, opts: get_node_options()},
+        {node: {node_type: 'B'}, uid: 3, opts: get_node_options(B)},
         {
           node: graph.nodes[0].children[2],
           uid: 4,
@@ -97,20 +95,20 @@ t('make_rendergraph: converts to rendergraph', t => {
           children: [
             {
               node: {node_type: 'Pseudo'},
+              key: 'false',
+              uid: '4/false',
+              opts: {...get_node_options(C).children[0], children_type: 'indexed'},
+              children: [{node: {node_type: 'A'}, uid: 5, opts: get_node_options(A)}],
+            },
+            {
+              node: {node_type: 'Pseudo'},
               key: 'true',
               uid: '4/true',
               opts: {...get_node_options(C).children[1], children_type: 'indexed'},
               children: [
-                {node: {node_type: 'A'}, uid: 5, opts: get_node_options()},
-                {node: {node_type: 'B'}, uid: 6, opts: get_node_options(B)},
+                {node: {node_type: 'A'}, uid: 6, opts: get_node_options()},
+                {node: {node_type: 'B'}, uid: 7, opts: get_node_options(B)},
               ],
-            },
-            {
-              node: {node_type: 'Pseudo'},
-              key: 'false',
-              uid: '4/false',
-              opts: {...get_node_options(C).children[0], children_type: 'indexed'},
-              children: [{node: {node_type: 'C'}, uid: 7, opts: get_node_options(C)}],
             },
           ],
         },
@@ -144,9 +142,9 @@ t('flatten_rendergraph: flattens', t => {
     'C',
     'Pseudo',
     'A',
-    'B',
     'Pseudo',
-    'C',
+    'A',
+    'B',
   ]
 
   rn_array.forEach((rn, i) => {
