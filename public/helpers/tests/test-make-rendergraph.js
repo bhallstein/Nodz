@@ -78,7 +78,7 @@ t('make_rendergraph: throws if children do not match node options', t => {
 })
 
 
-t('make_rendergraph: converts to rendergraph', t => {
+t('make_rendergraph: creates expected rendergraph', t => {
   const rg = make_rendergraph(graph, node_types)
   const expected = [
     {

@@ -6,6 +6,10 @@ import AddChildBtn from './AddChildBtn'
 import calculate_node_layout from './helpers/calculate-node-layout'
 import {make_rendergraph, flatten_rendergraph} from './helpers/make-rendergraph'
 import wrap_up from './helpers/wrap-up'
+import recurse from './helpers/recurse'
+import is_node from './helpers/is-node'
+import is_obj from './helpers/is-obj'
+import is_array from './helpers/is-array'
 
 const ref = i => `${i}-ref`
 
@@ -30,10 +34,15 @@ export default function Nodz({
 }) {
   const wrapper_ref = useRef()
   const [needs_layout, set_needs_layout] = useState(true)
-  const [selected, set_selected] = useState(null)
+  const [_, do_set_selected] = useState(null)
   const selected_ref = useRef(null)   // Prevents stale references in callbacks
   const [picker, set_picker] = useState(null)
   const [getRef, setRef] = use_dynamic_refs()
+
+  function set_selected(value) {
+    selected_ref.current = value
+    do_set_selected(value)
+  }
 
   // Graph -> Rendergraph
   const rg = make_rendergraph(graph, node_types)
@@ -46,7 +55,7 @@ export default function Nodz({
   )
   useEffect(() => {
     window.addEventListener('resize', () => set_needs_layout(true))
-    // window.addEventListener('keydown', ev => delete_node(ev))
+    window.addEventListener('keydown', ev => keydown(ev))
   }, [])
 
   if (!needs_layout && rns.length && wrapper_ref.current) {
@@ -90,21 +99,25 @@ export default function Nodz({
     set_needs_layout(true)
   }
 
-  // function delete_node(ev) {
-  //   const uid_selected = selected_ref.current
-  //   if (uid_selected && ev.key === 'Backspace') {
-  //     recurse(graph, n => {
-  //       if (n === graph) {
-  //         graph.nodes = graph.nodes.filter(child => child.uid !== uid_selected)
-  //       }
-  //       else if (is_node(n) && n.children) {
-  //         n.children = n.children.filter(child => child.uid !== uid_selected)
-  //       }
-  //     })
-  //     set_selected(null)
-  //     set_needs_layout(true)
-  //   }
-  // }
+  function delete_node(to_delete) {
+    recurse(graph, n => {
+      if (is_obj(n) || is_array(n)) {
+        const found = Object.keys(n).find(i => n[i] === to_delete)
+        if (found) {
+          is_array(n) && n.splice(found, 1)
+          is_obj(n) && delete n[found]
+        }
+      }
+    })
+    set_selected(null)
+    set_needs_layout(true)
+  }
+
+  function keydown(ev) {
+    if (ev.key === 'Backspace' && selected_ref.current) {
+      delete_node(selected_ref.current)
+    }
+  }
 
   return (
     <div style={{position: 'absolute', inset: 0}}
@@ -120,7 +133,7 @@ export default function Nodz({
             <RenderNode key={rn.uid}
                         rn={rn}
                         node_types={node_types}
-                        is_selected={selected === rn.node}
+                        is_selected={selected_ref.current === rn.node}
                         node_styles={node_styles}
                         open_node_picker={open_node_picker}
                         select_node={set_selected}
