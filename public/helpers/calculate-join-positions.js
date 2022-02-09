@@ -2,6 +2,7 @@ import is_rendernode from './is-rendernode'
 import recursive_reduce from './recursive-reduce'
 
 const h_spacing = 10
+const v_spacing = 4
 
 function calculate_join_position(rn, i_child) {
   const child_rn = rn.children[i_child]
@@ -9,11 +10,11 @@ function calculate_join_position(rn, i_child) {
 
   const parent_btm_center = {
     x: rn.layout.x + rn.layout.w__intrinsic / 2 - h_offset,
-    y: rn.layout.y + rn.layout.h__intrinsic,
+    y: rn.layout.y + rn.layout.h__intrinsic + v_spacing,
   }
   const child_top_center = {
     x: child_rn.layout.x + child_rn.layout.w__intrinsic / 2,
-    y: child_rn.layout.y,
+    y: child_rn.layout.y - v_spacing,
   }
 
   return {

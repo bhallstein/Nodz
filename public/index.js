@@ -49,8 +49,8 @@ const graph = {
   ],
 }
 
-function MyPseudo() {
-  return <div>I’m a pseudo</div>
+function MyPseudo({name}) {
+  return <div>{name}</div>
 }
 
 function App() {
