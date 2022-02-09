@@ -28,9 +28,10 @@ function get_layout_opts(opts = { }) {
 export default function Nodz({
   node_types,
   graph,
-  CustomPicker,
   node_styles,
   layout_options,
+  CustomPicker,
+  CustomPseudo,
 }) {
   const wrapper_ref = useRef()
   const [needs_layout, set_needs_layout] = useState(true)
@@ -137,7 +138,8 @@ export default function Nodz({
                         node_styles={node_styles}
                         open_node_picker={open_node_picker}
                         select_node={set_selected}
-                        ref={setRef(ref(rn.uid))} />
+                        ref={setRef(ref(rn.uid))}
+                        CustomPseudo={CustomPseudo} />
           ))}
         </div>
       )}

@@ -1,21 +1,15 @@
 import {forwardRef} from 'react'
 import AddChildBtn from './AddChildBtn'
-
-function Pseudo({rn}) {
-  return (
-    <div>
-      {rn.key}
-    </div>
-  )
-}
+import Pseudo from './Pseudo'
 
 const RenderNode = forwardRef(
   (
-    {rn, node_types, is_selected, node_styles, open_node_picker, select_node},
+    {rn, node_types, is_selected, node_styles, open_node_picker, select_node, CustomPseudo},
     ref,
   ) => {
     const NodeType = node_types[rn.node.node_type]
     const children_type = rn.opts.children_type
+    const PseudoElement = CustomPseudo || Pseudo
 
     const at_max_children = (
       rn.opts.max_children &&
@@ -54,7 +48,7 @@ const RenderNode = forwardRef(
                onClick={click}
           >
             {rn.node.node_type === 'Pseudo' && (
-              <Pseudo rn={rn} />
+              <PseudoElement name={rn.key} />
             )}
 
             {NodeType && (
@@ -69,42 +63,6 @@ const RenderNode = forwardRef(
                          style={add_btn_style} />
           )}
         </div>
-
-        {/* {rn.opts.children_type === 'named' && (
-          <div>
-            <div style={{padding: '0 1rem'}}>
-              <div style={{display: 'inline-block', ...node_styles(is_selected)}}
-                   onClick={click}
-              >
-                {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
-              </div>
-            </div>
-            <div style={{
-              marginTop: '1.2rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-            >
-              {children.map((child_spec, i) => (
-                <div key={child_spec.name}
-                     className="group"
-                     style={{
-                       position: 'relative',
-                       paddingBottom: '2rem',
-                       marginRight: i === children.length - 1 ? 0 : '1rem',
-                     }}
-                >
-                  <div style={{cursor: 'default', ...node_styles(false)}}>
-                    {child_spec.name}
-                  </div>
-                  <AddChildBtn node={node}
-                               open_node_picker={open_node_picker}
-                               style={add_btn_style} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )} */}
       </div>
     )
   },

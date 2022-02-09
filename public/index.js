@@ -49,6 +49,10 @@ const graph = {
   ],
 }
 
+function MyPseudo() {
+  return <div>I'm a pseudo</div>
+}
+
 function App() {
   return (
     <div style={{padding: '2rem'}}>
@@ -56,7 +60,8 @@ function App() {
         <Nodz node_types={node_types}
               graph={graph}
               node_styles={node_styles}
-              CustomPicker={null} />
+              CustomPicker={null}
+              CustomPseudo={MyPseudo} />
       </div>
     </div>
   )
