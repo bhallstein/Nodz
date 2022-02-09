@@ -1,13 +1,14 @@
 import {useEffect, useState, useRef} from 'react'
 import use_dynamic_refs from 'use-dynamic-refs'
 import RenderNode from './RenderNode'
+import Join from './Join'
 import NodePicker from './NodePicker'
 import AddChildBtn from './AddChildBtn'
 import calculate_node_layout from './helpers/calculate-node-layout'
+import calculate_join_positions from './helpers/calculate-join-positions'
 import {make_rendergraph, flatten_rendergraph} from './helpers/make-rendergraph'
 import wrap_up from './helpers/wrap-up'
 import recurse from './helpers/recurse'
-import is_node from './helpers/is-node'
 import is_obj from './helpers/is-obj'
 import is_array from './helpers/is-array'
 
@@ -37,6 +38,7 @@ export default function Nodz({
   const [needs_layout, set_needs_layout] = useState(true)
   const [_, do_set_selected] = useState(null)
   const selected_ref = useRef(null)   // Prevents stale references in callbacks
+  const joins = useRef([])
   const [picker, set_picker] = useState(null)
   const [getRef, setRef] = use_dynamic_refs()
 
@@ -61,7 +63,10 @@ export default function Nodz({
 
   if (!needs_layout && rns.length && wrapper_ref.current) {
     calculate_node_layout(wrapper_ref.current, rg, rns, get_layout_opts(layout_options))
+    joins.current = calculate_join_positions(rg)
   }
+
+  console.log('//joins/', joins)
 
   function open_node_picker(parent, add_node_btn_ref) {
     set_picker({
@@ -143,6 +148,8 @@ export default function Nodz({
           ))}
         </div>
       )}
+
+      {joins.current.map((j, i) => <Join key={i} j={j} />)}
 
       {rns.length === 0 && (
         <div style={{display: 'flex', justifyContent: 'center'}}>

@@ -50,7 +50,7 @@ const graph = {
 }
 
 function MyPseudo() {
-  return <div>I'm a pseudo</div>
+  return <div>I’m a pseudo</div>
 }
 
 function App() {

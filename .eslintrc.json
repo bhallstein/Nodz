@@ -25,7 +25,7 @@
     "comma-dangle": ["error", "always-multiline"],
     "comma-spacing": ["error", {"before": false, "after": true}],
     "id-length": ["error", {"min": 2, "properties": "always",
-      "exceptions": ["i", "j", "k", "n", "_", "t", "p", "x", "y"],
+      "exceptions": ["i", "j", "k", "n", "_", "t", "p", "x", "y", "w", "h"],
       "exceptionPatterns": ["[A-Z]"]
     }],
     "indent": ["error", 2, {"ignoredNodes": ["JSXAttribute", "JSXSpreadAttribute"]}],

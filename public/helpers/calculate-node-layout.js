@@ -1,4 +1,3 @@
-import is_node from './is-node'
 import is_rendernode from './is-rendernode'
 import recurse from './recurse'
 import recursive_reduce from './recursive-reduce'
@@ -26,9 +25,9 @@ export default function calculate_node_layout(wrapper, rg, rns, layout_opts) {
     return carry
   }, {}, 'base_node')
 
-  const tier_heights = Object.values(tiers).map(tier => {
-    return tier.reduce((carry, n) => Math.max(carry, n.layout.h__intrinsic), 0)
-  })
+  const tier_heights = Object.values(tiers).map(
+    tier => tier.reduce((carry, n) => Math.max(carry, n.layout.h__intrinsic), 0),
+  )
 
   // Assign cumulative child widths to all nodes by depth-first recursion
   recurse(rg, null, rn => {
