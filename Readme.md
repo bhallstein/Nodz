@@ -50,8 +50,6 @@ render(<App />, document.body)
 
 ## Children types
 
-Node exit types:
-
 - indexed - numeric children
           - default
           - render as line to AddChildBtn
@@ -72,7 +70,7 @@ Node exit types:
        - e.g.: {children_type: 'none'}
 
 NB: all 'plus' interaction points should either use a preset node type, or
-//     call out to user code to get the node types & descriptions amically
+     call out to user code to get the node types & descriptions amically
     (so allowing a node to customise its possible children based on context)
     (or, use user-supplied react elements instead of built in)
 - Allow external elements to be passed into node addition popover

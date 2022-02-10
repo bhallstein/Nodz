@@ -1,12 +1,12 @@
-import is_obj from './is-obj'
-import is_array from './is-array'
+import is_obj from './is-obj.js'
+import is_array from './is-array.js'
 
-export default function recurse(obj, func, func_unwind) {
-  func && func(obj)
+export default function recurse(item, func, func_unwind) {
+  func && func(item)
 
-  if (is_obj(obj) || is_array(obj)) {
-    Object.values(obj).forEach(item => recurse(item, func, func_unwind))
+  if (is_obj(item) || is_array(item)) {
+    Object.values(item).forEach(child => recurse(child, func, func_unwind))
   }
 
-  func_unwind && func_unwind(obj)
+  func_unwind && func_unwind(item)
 }

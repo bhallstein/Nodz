@@ -1,96 +1,127 @@
 import {useEffect, useState, useRef} from 'react'
 import use_dynamic_refs from 'use-dynamic-refs'
 import RenderNode from './RenderNode'
-import Picker from './Picker'
-import recursive_reduce from './helpers/recursive-reduce'
-import is_node from './helpers/is-node'
-import calculate_node_layout from './helpers/calculate-node-layout'
-import recurse from './helpers/recurse'
+import Join from './Join'
+import NodePicker from './NodePicker'
 import AddChildBtn from './AddChildBtn'
+import calculate_node_layout from './helpers/calculate-node-layout'
+import calculate_join_positions from './helpers/calculate-join-positions'
+import {make_rendergraph, flatten_rendergraph} from './helpers/make-rendergraph'
+import wrap_up from './helpers/wrap-up'
+import recurse from './helpers/recurse'
+import is_obj from './helpers/is-obj'
+import is_array from './helpers/is-array'
 
 const ref = i => `${i}-ref`
-const dummy_ref = i => `${i}-dummy-ref`
 
-let uid_counter = 0
-function uid() {
-  return (uid_counter += 1)
+const default_layout_opts = {
+  v_padding: 50,
+  h_padding: 50,
 }
 
-export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
+function get_layout_opts(opts = { }) {
+  return {
+    ...default_layout_opts,
+    ...opts,
+  }
+}
+
+export default function Nodz({
+  node_types,
+  graph,
+  node_styles,
+  layout_options,
+  CustomPicker,
+  CustomPseudo,
+}) {
   const wrapper_ref = useRef()
   const [needs_layout, set_needs_layout] = useState(true)
-  const [selected, do_set_selected] = useState(null)
-  const selected_ref = useRef(null)   // To prevent stale references in callbacks
+  const [_, do_set_selected] = useState(null)
+  const selected_ref = useRef(null)   // Prevents stale references in callbacks
+  const joins = useRef([])
   const [picker, set_picker] = useState(null)
   const [getRef, setRef] = use_dynamic_refs()
 
-  function set_selected(node_uid) {
-    selected_ref.current = node_uid
-    do_set_selected(node_uid)
+  function set_selected(value) {
+    selected_ref.current = value
+    do_set_selected(value)
   }
 
-  const nodes_array = recursive_reduce(
-    graph,
-    (carry, n) => (is_node(n) ? carry.concat(n) : carry),
-    [],
-    'base_node',
-  )
-  nodes_array.forEach(n => {
-    n.uid = n.uid || uid()
-    n.ref = getRef(ref(n.uid))
-    n.dummy_ref = getRef(dummy_ref(n.uid))
-  })
+  // Graph -> Rendergraph
+  const rg = make_rendergraph(graph, node_types)
+  const rns = flatten_rendergraph(rg)
+  rns.forEach(rn => rn.ref = getRef(ref(rn.uid)))
 
   useEffect(
-    () => {
-      needs_layout && set_needs_layout(false)
-    },
+    () => needs_layout && set_needs_layout(false),
     [needs_layout],
   )
   useEffect(() => {
     window.addEventListener('resize', () => set_needs_layout(true))
-    window.addEventListener('keydown', ev => delete_node(ev))
+    window.addEventListener('keydown', ev => keydown(ev))
   }, [])
 
-  if (!needs_layout && nodes_array.length) {
-    calculate_node_layout(wrapper_ref, nodes_array[0], nodes_array)
+  if (!needs_layout && rns.length && wrapper_ref.current) {
+    calculate_node_layout(wrapper_ref.current, rg, rns, get_layout_opts(layout_options))
+    joins.current = calculate_join_positions(rg)
   }
 
-  function open_node_picker(parent, dot_adder_ref) {
+  console.log('//joins/', joins)
+
+  function open_node_picker(parent, add_node_btn_ref) {
     set_picker({
       parent,
-      dot_adder_ref,
+      add_node_btn_ref,
     })
   }
 
-  function add_node(parent, new_node) {
-    if (parent) {
-      !parent.children && (parent.children = [])
-      parent.children.push(new_node)
-    }
-    else {
+  function add_node(rn, new_node) {
+    if (!rn) {
       graph.nodes.push(new_node)
     }
+
+    else {
+      if (rn.node.node_type === 'Pseudo') {
+        const parent = rns.filter(rn => rn.children)
+          .find(parent => {
+            const child_uids = parent.children.map(child => child.uid)
+            return child_uids.includes(rn.uid)
+          })
+        if (!parent.node.children) {
+          parent.node.children = { }
+        }
+        const child_array = wrap_up((parent.node.children)[rn.key] || [])
+        parent.node.children[rn.key] = [
+          ...child_array,
+          new_node,
+        ]
+      }
+      else {
+        !rn.node.children && (rn.node.children = [])
+        rn.node.children.push(new_node)
+      }
+    }
+
     set_needs_layout(true)
   }
 
-  function select_node(n) {
-    set_selected(n ? n.uid : null)
+  function delete_node(to_delete) {
+    recurse(graph, n => {
+      if (is_obj(n) || is_array(n)) {
+        const found = Object.keys(n).find(i => n[i] === to_delete)
+        if (found) {
+          is_array(n) && n.splice(found, 1)
+          is_obj(n) && delete n[found]
+        }
+      }
+    })
+    set_selected(null)
+    set_needs_layout(true)
   }
 
-  function delete_node(ev) {
-    const uid_selected = selected_ref.current
-    if (uid_selected && ev.key === 'Backspace') {
-      recurse(graph, n => {
-        if (n === graph) {
-          graph.nodes = graph.nodes.filter(child => child.uid !== uid_selected)
-        }
-        else if (is_node(n) && n.children) {
-          n.children = n.children.filter(child => child.uid !== uid_selected)
-        }
-      })
-      set_selected(null)
-      set_needs_layout(true)
+  function keydown(ev) {
+    if (ev.key === 'Backspace' && selected_ref.current) {
+      delete_node(selected_ref.current)
     }
   }
 
@@ -98,56 +129,40 @@ export default function Nodz({node_types, graph, node_styles, CustomPicker}) {
     <div style={{position: 'absolute', inset: 0}}
          ref={wrapper_ref}
          onClick={() => {
-           select_node(null)
+           set_selected(null)
            set_picker(null)
          }}
     >
-      {/* Dummy nodes */}
-      {nodes_array.length > 0 && (
-        <div style={{
-          width: '0',
-          height: '0',
-          overflow: 'hidden',
-        }}
-        >
-          {nodes_array.map((node, i) => (
-            <RenderNode key={i}
-                        NodeType={node_types[node.node_type]}
-                        node={node}
-                        node_styles={node_styles}
-                        ref={setRef(dummy_ref(node.uid))} />
-          ))}
-        </div>
-      )}
-
-      {/* UI */}
-      {nodes_array.length > 0 && (
+      {rns.length > 0 && (
         <div>
-          {nodes_array.map((node, i) => (
-            <RenderNode key={i}
-                        NodeType={node_types[node.node_type]}
-                        node={node}
-                        is_selected={selected === node.uid}
+          {rns.map(rn => (
+            <RenderNode key={rn.uid}
+                        rn={rn}
+                        node_types={node_types}
+                        is_selected={selected_ref.current === rn.node}
                         node_styles={node_styles}
                         open_node_picker={open_node_picker}
-                        select_node={select_node}
-                        ref={setRef(ref(node.uid))} />
+                        select_node={set_selected}
+                        ref={setRef(ref(rn.uid))}
+                        CustomPseudo={CustomPseudo} />
           ))}
         </div>
       )}
 
-      {nodes_array.length === 0 && (
+      {joins.current.map((j, i) => <Join key={i} j={j} />)}
+
+      {rns.length === 0 && (
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <AddChildBtn open_node_picker={open_node_picker} />
         </div>
       )}
 
       {picker && (
-        <Picker node_types={node_types}
-                picker={picker}
-                wrapper_ref={wrapper_ref}
-                add_node={add_node}
-                CustomPicker={CustomPicker} />
+        <NodePicker node_types={node_types}
+                    picker={picker}
+                    wrapper_ref={wrapper_ref}
+                    add_node={add_node}
+                    CustomPicker={CustomPicker} />
       )}
     </div>
   )

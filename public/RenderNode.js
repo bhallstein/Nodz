@@ -1,38 +1,20 @@
 import {forwardRef} from 'react'
 import AddChildBtn from './AddChildBtn'
-
-const empty_obj = () => ({})
-
-function ErrorNode({type}) {
-  return (
-    <div style={{width: '8rem'}}>
-      Error: {type} not found in node_types
-    </div>
-  )
-}
+import Pseudo from './Pseudo'
 
 const RenderNode = forwardRef(
   (
-    {NodeType, node, is_selected, node_styles, open_node_picker, select_node},
+    {rn, node_types, is_selected, node_styles, open_node_picker, select_node, CustomPseudo},
     ref,
   ) => {
-    const {
-      children_type = 'indexed',
-      max_children = -1,
-      children = [],
-    } = (NodeType.options || empty_obj)(node)
+    const NodeType = node_types[rn.node.node_type]
+    const children_type = rn.opts.children_type
+    const PseudoElement = CustomPseudo || Pseudo
 
-    const n_children = (node.children || []).length
     const at_max_children = (
-      children_type === 'indexed' &&
-      max_children !== -1 &&
-      n_children >= max_children
+      rn.opts.max_children &&
+      (rn.children || []).length >= rn.opts.max_children
     )
-
-    function click(ev) {
-      select_node && select_node(node)
-      ev.stopPropagation()
-    }
 
     const add_btn_style = {
       position: 'absolute',
@@ -41,72 +23,46 @@ const RenderNode = forwardRef(
       top: 'calc(100% - 1rem)',
     }
 
+    function click(ev) {
+      select_node && select_node(rn.node)
+      ev.stopPropagation()
+    }
+
     return (
       <div ref={ref}
            class="render-node"
            style={{
-             visibility: node.layout ? 'visible' : 'hidden',
+             visibility: rn.layout ? 'visible' : 'hidden',
              position: 'absolute',
-             top: `${node.layout && node.layout.y}px`,
-             left: `${node.layout && node.layout.x}px`,
+             top: `${rn.layout && rn.layout.y}px`,
+             left: `${rn.layout && rn.layout.x}px`,
            }}
       >
-        {children_type === 'indexed' && (
-          <div className="group"
-               style={{
-                 position: 'relative',
-                 paddingBottom: '2rem',
-               }}
+        <div className="group"
+             style={{
+               position: 'relative',
+               paddingBottom: children_type === 'indexed' ? '2rem' : '',
+             }}
+        >
+          <div style={node_styles(is_selected)}
+               onClick={click}
           >
-            <div style={node_styles(is_selected)}
-                 onClick={click}
-            >
-              {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
-            </div>
+            {rn.node.node_type === 'Pseudo' && (
+              <PseudoElement name={rn.key} />
+            )}
 
-            <AddChildBtn node={node}
+            {NodeType && (
+              <NodeType />
+            )}
+          </div>
+
+          {children_type === 'indexed' && (
+            <AddChildBtn rn={rn}
                          open_node_picker={open_node_picker}
                          disabled={at_max_children}
                          style={add_btn_style} />
-          </div>
-        )}
-
-        {children_type === 'named' && (
-          <div>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-              <div style={{display: 'inline-block', ...node_styles(is_selected)}}
-                   onClick={click}
-              >
-                {NodeType ? <NodeType /> : <ErrorNode type={node.node_type} />}
-              </div>
-            </div>
-
-            <div style={{
-              marginTop: '1.2rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-            >
-              {children.map((child_spec, i) => (
-                <div key={child_spec.name}
-                     className="group"
-                     style={{
-                       position: 'relative',
-                       paddingBottom: '2rem',
-                       marginRight: i === children.length - 1 ? 0 : '1rem',
-                     }}
-                >
-                  <div style={{cursor: 'default', ...node_styles(false)}}>
-                    {child_spec.name}
-                  </div>
-                  <AddChildBtn node={node}
-                               open_node_picker={open_node_picker}
-                               style={add_btn_style} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     )
   },
