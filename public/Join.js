@@ -1,4 +1,4 @@
-const padding = 3
+const padding = 10
 
 function path__straight(from, to, ox, oy) {
   return `L ${to.x - ox} ${to.y - oy}`
@@ -33,14 +33,24 @@ export default function Join({j}) {
       height: `${h}px`,
       left: `${ox}px`,
       top: `${oy}px`,
-      stroke: 'black',
-      fill: 'none',
+      color: 'black',
     }}
     >
-      <path d={`
-        M ${j.from.x - ox} ${j.from.y - oy}
-        ${path__bezier(j.from, j.to, ox, oy)}
-      `} />
+      <path id={j.id}
+            d={`
+              M ${j.from.x - ox} ${j.from.y - oy}
+              ${path__bezier(j.from, j.to, ox, oy)}
+            `}
+            style={{
+              fill: 'none',
+              stroke: 'currentColor',
+            }} />
+
+      <polygon points="-5,-5 5,0 -5,5 -3,0" fill="currentColor">
+        <animateMotion dur="2s" repeatCount="indefinite" rotate="auto" fill="freeze">
+          <mpath xlinkHref={`#${j.id}`} />
+        </animateMotion>
+      </polygon>
     </svg>
   )
 }

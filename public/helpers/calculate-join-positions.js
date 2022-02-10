@@ -20,6 +20,7 @@ function calculate_join_position(rn, i_child) {
   return {
     from: parent_btm_center,
     to: child_top_center,
+    id: `join-${rn.uid}-${child_rn.uid}`,
   }
 }
 
